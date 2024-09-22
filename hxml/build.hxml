@@ -1,0 +1,8 @@
+-cp src
+-cp build
+
+--library jume
+
+--js dist/jume.js
+
+--main Build

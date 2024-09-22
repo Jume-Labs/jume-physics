@@ -1,0 +1,13 @@
+{
+  "name": "jume-physics",
+  "version": "0.1.0",
+  "description": "Basic AABB physics for the Jume Game Engine",
+  "classPath": "src",
+  "license": "MIT",
+  "contributors": ["Codescapade"],
+  "releasenote": "",
+  "url": "https://github.com/jume-labs/jume-physics",
+  "dependencies": {
+    "jume": "git:https://github.com/jume-labs/jume.gi"
+  }
+}
