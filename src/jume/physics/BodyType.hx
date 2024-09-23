@@ -1,4 +1,4 @@
-package jumePhysics;
+package jume.physics;
 
 enum abstract BodyType(String) {
   var DYNAMIC = 'dynamic';

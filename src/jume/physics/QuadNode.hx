@@ -1,9 +1,8 @@
-package jumePhysics;
+package jume.physics;
 
-import jumePhysics.components.CPhysicsBody;
-
-import jume.math.Vec2;
 import jume.math.Rectangle;
+import jume.math.Vec2;
+import jume.physics.components.CPhysicsBody;
 
 class QuadNode {
   static final MAX_BODIES = 6;

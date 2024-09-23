@@ -1,8 +1,7 @@
-package jumePhysics;
+package jume.physics;
 
 import jume.math.Vec2;
-
-import jumePhysics.components.CPhysicsBody;
+import jume.physics.components.CPhysicsBody;
 
 class RayHitList {
   public var hits(default, null): Array<RayHit> = [];

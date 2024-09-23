@@ -1,4 +1,4 @@
-package jumePhysics.components;
+package jume.physics.components;
 
 import jume.ecs.Component;
 import jume.math.Rectangle;

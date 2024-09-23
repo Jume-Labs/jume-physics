@@ -1,9 +1,8 @@
-package jumePhysics;
+package jume.physics;
 
-import jume.math.Vec2;
 import jume.math.Rectangle;
-
-import jumePhysics.components.CPhysicsBody;
+import jume.math.Vec2;
+import jume.physics.components.CPhysicsBody;
 
 class QuadTree {
   public var bounds(default, null): Rectangle;

@@ -1,6 +1,4 @@
-package jumePhysics.systems;
-
-import jumePhysics.events.PhysicsEvent;
+package jume.physics.systems;
 
 import jume.ecs.Entity;
 import jume.ecs.System;
@@ -12,10 +10,10 @@ import jume.graphics.Graphics;
 import jume.math.Rectangle;
 import jume.math.Size;
 import jume.math.Vec2;
+import jume.physics.components.CPhysicsBody;
+import jume.physics.events.PhysicsEvent;
 import jume.view.Camera;
 import jume.view.View;
-
-import jumePhysics.components.CPhysicsBody;
 
 using jume.math.MathUtils;
 

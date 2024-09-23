@@ -1,9 +1,8 @@
-package jumePhysics.events;
+package jume.physics.events;
 
-import jumePhysics.components.CPhysicsBody;
-
-import jume.events.EventType;
 import jume.events.Event;
+import jume.events.EventType;
+import jume.physics.components.CPhysicsBody;
 
 class PhysicsEvent extends Event {
   public static final TRIGGER_START: EventType<PhysicsEvent> = 'jume_basic_trigger_start';
