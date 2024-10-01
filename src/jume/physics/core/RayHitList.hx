@@ -1,7 +1,6 @@
-package jume.physics;
+package jume.physics.core;
 
 import jume.math.Vec2;
-import jume.physics.components.CPhysicsBody;
 
 class RayHitList {
   public var hits(default, null): Array<RayHit> = [];
@@ -14,7 +13,7 @@ class RayHitList {
 
   public function new() {}
 
-  public function insert(target: Vec2, origin: Vec2, ?body: CPhysicsBody) {
+  public function insert(target: Vec2, origin: Vec2, ?body: Body) {
     final hit = RayHit.get(target, origin, body);
 
     if (hits.length > 0) {

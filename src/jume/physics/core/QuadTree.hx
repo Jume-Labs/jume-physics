@@ -1,8 +1,7 @@
-package jume.physics;
+package jume.physics.core;
 
 import jume.math.Rectangle;
 import jume.math.Vec2;
-import jume.physics.components.CPhysicsBody;
 
 class QuadTree {
   public var bounds(default, null): Rectangle;
@@ -16,11 +15,11 @@ class QuadTree {
     root = new QuadNode(1, x, y, width, height);
   }
 
-  public function insert(body: CPhysicsBody) {
+  public function insert(body: Body) {
     root.insert(body);
   }
 
-  public function getBodyList(body: CPhysicsBody, ?out: Array<CPhysicsBody>): Array<CPhysicsBody> {
+  public function getBodyList(body: Body, ?out: Array<Body>): Array<Body> {
     if (out == null) {
       out = [];
     }

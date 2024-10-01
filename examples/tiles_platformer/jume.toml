@@ -1,0 +1,33 @@
+
+assetsFolder = "assets"
+
+shaderFolder = "shaders"
+
+sourceFolders = ["src"]
+
+main = "Main"
+
+outDir = "export"
+
+debug = true
+
+libraries = ["jume-physics"]
+
+parameters = ["-dce full"]
+
+[[atlases]]
+name = "sprites"
+saveFolder = "assets/atlases"
+folders = ["art/sprites"]
+trimmed = true
+extrude = 1
+packMethod = "optimal"
+
+[[atlases]]
+name = "tiles"
+saveFolder = "assets/atlases"
+folders = ["art/tiles"]
+trimmed = false
+extrude = 1
+packMethod = "basic"
+noData = true

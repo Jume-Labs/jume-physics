@@ -1,4 +1,4 @@
-package jume.physics;
+package jume.physics.core;
 
 using jume.utils.Bitset;
 

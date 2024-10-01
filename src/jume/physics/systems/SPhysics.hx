@@ -1,5 +1,7 @@
 package jume.physics.systems;
 
+import jume.physics.components.CTilemapCollider;
+import jume.physics.core.Resolver.separate;
 import jume.ecs.Entity;
 import jume.ecs.System;
 import jume.ecs.components.CTransform;
@@ -11,6 +13,9 @@ import jume.math.Rectangle;
 import jume.math.Size;
 import jume.math.Vec2;
 import jume.physics.components.CPhysicsBody;
+import jume.physics.core.Body;
+import jume.physics.core.QuadTree;
+import jume.physics.core.RayHitList;
 import jume.physics.events.PhysicsEvent;
 import jume.view.Camera;
 import jume.view.View;
@@ -45,11 +50,11 @@ class SPhysics extends System {
 
   public var gravity: Vec2;
 
-  static final OVERLAP_PADDING = 4;
-
   final entities: Array<Entity> = [];
 
-  var treeList: Array<CPhysicsBody>;
+  final tilemaps: Array<Entity> = [];
+
+  var treeList: Array<Body>;
 
   var interactionEvents: Array<PhysicsEvent>;
 
@@ -61,11 +66,11 @@ class SPhysics extends System {
 
   var tempPos: Vec2;
 
-  final boundsColor = new Color(110, 110, 110);
-  final bodyColor = new Color(0, 110, 220);
-  final staticBodyColor = new Color(0, 200, 0);
-  final rayColor = new Color(255, 127, 0);
-  final rayHitColor = new Color(255, 255, 0);
+  final boundsColor = new Color(110 / 255, 110 / 255, 110 / 255);
+  final bodyColor = new Color(0, 110 / 255, 220 / 255);
+  final staticBodyColor = new Color(0, 200 / 255, 0);
+  final rayColor = new Color(255 / 255, 127 / 255, 0);
+  final rayHitColor = new Color(1, 1, 0);
 
   @:inject
   var events: Events;
@@ -104,6 +109,7 @@ class SPhysics extends System {
     }
 
     registerList({ entities: entities, components: [CPhysicsBody, CTransform] });
+    registerList({ entities: tilemaps, components: [CTilemapCollider] });
     active = true;
 
     return this;
@@ -120,12 +126,28 @@ class SPhysics extends System {
 
     tree.clear();
 
+    for (entity in tilemaps) {
+      if (!entity.active) {
+        continue;
+      }
+
+      final collider = entity.getComponent(CTilemapCollider);
+      for (body in collider.bodies) {
+        updatePastInteractions(body);
+        body.wasTouching = body.touching;
+        if (!bounds.intersects(body.bounds)) {
+          continue;
+        }
+        tree.insert(body);
+      }
+    }
+
     for (entity in entities) {
       if (!entity.active) {
         continue;
       }
 
-      final body = entity.getComponent(CPhysicsBody);
+      final body = entity.getComponent(CPhysicsBody).body;
       updatePastInteractions(body);
       body.wasTouching = body.touching;
       body.lastPos.set(body.bounds.x, body.bounds.y);
@@ -170,7 +192,7 @@ class SPhysics extends System {
 
     for (i in 0...iterations) {
       for (entity in entities) {
-        final body = entity.getComponent(CPhysicsBody);
+        final body = entity.getComponent(CPhysicsBody).body;
         while (treeList.length > 0) {
           treeList.pop();
         }
@@ -188,7 +210,7 @@ class SPhysics extends System {
     }
 
     for (entity in entities) {
-      final body = entity.getComponent(CPhysicsBody);
+      final body = entity.getComponent(CPhysicsBody).body;
       for (b in body.wasCollidingWith) {
         if (!body.collidingWith.contains(b)) {
           interactionEvents.push(PhysicsEvent.get(PhysicsEvent.COLLISION_END, body, b));
@@ -233,8 +255,25 @@ class SPhysics extends System {
           }
         }
 
+        for (entity in tilemaps) {
+          if (!entity.active) {
+            continue;
+          }
+
+          final collider = entity.getComponent(CTilemapCollider);
+          for (body in collider.bodies) {
+            final bounds = body.bounds;
+            graphics.color.copyFrom(staticBodyColor);
+            graphics.drawRect(bounds, debugLineWidth);
+          }
+        }
+
         for (entity in entities) {
-          final body = entity.getComponent(CPhysicsBody);
+          if (!entity.active) {
+            continue;
+          }
+
+          final body = entity.getComponent(CPhysicsBody).body;
           final bounds = body.bounds;
           if (body.bodyType == STATIC) {
             graphics.color.copyFrom(staticBodyColor);
@@ -260,17 +299,6 @@ class SPhysics extends System {
         graphics.popTarget();
       }
     }
-
-    graphics.transform.identity();
-    graphics.color.set(255, 255, 255, 255);
-
-    graphics.start(false);
-    // Render all cameras to the main target.
-    for (camera in cameras) {
-      tempPos.set(camera.screenBounds.x, camera.screenBounds.y);
-      graphics.drawRenderTarget(tempPos, camera.target);
-    }
-    graphics.present();
   }
 
   public function raycast(start: Vec2, end: Vec2, ?tags: Array<String>, ?out: RayHitList): RayHitList {
@@ -322,7 +350,10 @@ class SPhysics extends System {
     this.tree.updateBounds(bounds.x, bounds.y, bounds.width, bounds.height);
   }
 
-  function updatePastInteractions(body: CPhysicsBody) {
+  function updatePastInteractions(body: Body) {
+    if (body == null) {
+      trace('no body');
+    }
     while (body.wasCollidingWith.length > 0) {
       body.wasCollidingWith.pop();
     }
@@ -340,7 +371,7 @@ class SPhysics extends System {
     }
   }
 
-  function checkCollision(body1: CPhysicsBody, body2: CPhysicsBody) {
+  function checkCollision(body1: Body, body2: Body) {
     if (body1.mask.has(body2.group) && body2.mask.has(body1.group) && intersects(body1, body2)) {
       if (body1.bodyType == DYNAMIC && !body1.isTrigger && !body2.isTrigger) {
         separate(body1, body2);
@@ -389,7 +420,7 @@ class SPhysics extends System {
     }
   }
 
-  function hasInteraction(type: EventType<PhysicsEvent>, body1: CPhysicsBody, body2: CPhysicsBody): Bool {
+  function hasInteraction(type: EventType<PhysicsEvent>, body1: Body, body2: Body): Bool {
     for (event in interactionEvents) {
       if (event.type == type && event.body1 == body1 && event.body2 == body2) {
         return true;
@@ -399,140 +430,12 @@ class SPhysics extends System {
     return false;
   }
 
-  function separate(body1: CPhysicsBody, body2: CPhysicsBody): Bool {
-    if (Math.abs(body1.velocity.x) > Math.abs(body1.velocity.y)) {
-      return separateX(body1, body2) || separateY(body1, body2);
-    } else {
-      return separateY(body1, body2) || separateX(body1, body2);
-    }
-  }
-
-  function separateX(body1: CPhysicsBody, body2: CPhysicsBody): Bool {
-    final bounds1 = body1.bounds;
-    final bounds2 = body2.bounds;
-
-    var overlap = Math.min(bounds1.x + bounds1.width, bounds2.x + bounds2.width) - Math.max(bounds1.x, bounds2.x);
-    final ov = bounds1.x > bounds2.x ? overlap : -overlap;
-
-    if ((ov < 0 && bounds1.x + bounds1.width * 0.5 > bounds2.x + bounds2.width * 0.5)
-      || (ov > 0 && bounds1.x + bounds1.width * 0.5 < bounds2.x + bounds2.width * 0.5)) {
-      return false;
-    }
-
-    final delta = bounds1.x - body1.lastPos.x;
-
-    if (overlap > Math.abs(delta) + OVERLAP_PADDING && delta != 0) {
-      overlap = 0;
-    }
-    overlap = bounds1.x > bounds2.x ? overlap : -overlap;
-
-    if (overlap == 0) {
-      return false;
-    }
-
-    if (overlap > 0) {
-      if (body1.velocity.x > 0 || !body1.canCollide.has(LEFT) || !body2.canCollide.has(RIGHT)) {
-        return false;
-      }
-
-      body1.touching.add(LEFT);
-      body2.touching.add(RIGHT);
-    } else {
-      if (body1.velocity.x < 0 || !body1.canCollide.has(RIGHT) || !body2.canCollide.has(LEFT)) {
-        return false;
-      }
-
-      body1.touching.add(RIGHT);
-      body2.touching.add(LEFT);
-    }
-
-    if (body2.bodyType != DYNAMIC) {
-      bounds1.x += overlap;
-      body1.velocity.x = -body1.velocity.x * body1.bounce;
-    } else {
-      overlap *= 0.5;
-      bounds1.x += overlap;
-      bounds2.x -= overlap;
-
-      var velocity1 = body2.velocity.x;
-      var velocity2 = body1.velocity.x;
-      final average = (velocity1 + velocity2) * 0.5;
-
-      velocity1 -= average;
-      velocity2 -= average;
-      body1.velocity.x = average + velocity1 * body1.bounce;
-      body2.velocity.x = average + velocity2 * body2.bounce;
-    }
-
-    return true;
-  }
-
-  function separateY(body1: CPhysicsBody, body2: CPhysicsBody): Bool {
-    final bounds1 = body1.bounds;
-    final bounds2 = body2.bounds;
-
-    var overlap = Math.min(bounds1.y + bounds1.height, bounds2.y + bounds2.height) - Math.max(bounds1.y, bounds2.y);
-    final ov = bounds1.y > bounds2.y ? overlap : -overlap;
-
-    if ((ov < 0 && bounds1.y + bounds1.height * 0.5 > bounds2.y + bounds2.height * 0.5)
-      || (ov > 0 && bounds1.y + bounds1.height * 0.5 < bounds2.y + bounds2.height * 0.5)) {
-      return false;
-    }
-
-    final delta = bounds1.y - body1.lastPos.y;
-
-    if (overlap > Math.abs(delta) + OVERLAP_PADDING && delta != 0) {
-      overlap = 0;
-    }
-    overlap = bounds1.y > bounds2.y ? overlap : -overlap;
-
-    if (overlap == 0) {
-      return false;
-    }
-
-    if (overlap > 0) {
-      if (body1.velocity.y > 0 || !body1.canCollide.has(TOP) || !body2.canCollide.has(BOTTOM)) {
-        return false;
-      }
-
-      body1.touching.add(TOP);
-      body2.touching.add(BOTTOM);
-    } else {
-      if (body1.velocity.y < 0 || !body1.canCollide.has(BOTTOM) || !body2.canCollide.has(TOP)) {
-        return false;
-      }
-
-      body1.touching.add(BOTTOM);
-      body2.touching.add(TOP);
-    }
-
-    if (body2.bodyType != DYNAMIC) {
-      bounds1.y += overlap;
-      body1.velocity.y = -body1.velocity.y * body1.bounce;
-    } else {
-      overlap *= 0.5;
-      bounds1.y += overlap;
-      bounds2.y -= overlap;
-
-      var velocity1 = body2.velocity.y;
-      var velocity2 = body1.velocity.y;
-      final average = (velocity1 + velocity2) * 0.5;
-
-      velocity1 -= average;
-      velocity2 -= average;
-      body1.velocity.y = average + velocity1 * body1.bounce;
-      body2.velocity.y = average + velocity2 * body2.bounce;
-    }
-
-    return true;
-  }
-
-  inline function intersects(body1: CPhysicsBody, body2: CPhysicsBody): Bool {
+  inline function intersects(body1: Body, body2: Body): Bool {
     return body1.bounds.intersects(body2.bounds);
   }
 
   function updateBodyBounds(entity: Entity) {
-    final body = entity.getComponent(CPhysicsBody);
+    final body = entity.getComponent(CPhysicsBody).body;
     final transform = entity.getComponent(CTransform);
 
     final worldPos = transform.getWorldPosition();
@@ -545,10 +448,11 @@ class SPhysics extends System {
   }
 
   function updateBodyTransform(entity: Entity) {
-    final body = entity.getComponent(CPhysicsBody);
-    if (body.bodyType == BodyType.STATIC) {
+    final body = entity.getComponent(CPhysicsBody).body;
+    if (body.bodyType == STATIC) {
       return;
     }
+
     final worldPos = Vec2.get(body.bounds.x + body.bounds.width * 0.5 - body.offset.x,
       body.bounds.y + body.bounds.height * 0.5 - body.offset.y);
     entity.getComponent(CTransform).setWorldPosition(worldPos);

@@ -2,7 +2,7 @@ package jume.physics.events;
 
 import jume.events.Event;
 import jume.events.EventType;
-import jume.physics.components.CPhysicsBody;
+import jume.physics.core.Body;
 
 class PhysicsEvent extends Event {
   public static final TRIGGER_START: EventType<PhysicsEvent> = 'jume_basic_trigger_start';
@@ -17,7 +17,7 @@ class PhysicsEvent extends Event {
 
   public static final COLLISION_END: EventType<PhysicsEvent> = 'jume_basic_collision_end';
 
-  var body1: CPhysicsBody;
+  var body1: Body;
 
-  var body2: CPhysicsBody;
+  var body2: Body;
 }

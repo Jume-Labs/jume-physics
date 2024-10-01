@@ -1,7 +1,6 @@
-package jume.physics;
+package jume.physics.core;
 
 import jume.math.Vec2;
-import jume.physics.components.CPhysicsBody;
 
 using jume.math.MathUtils;
 
@@ -12,11 +11,11 @@ class RayHit {
 
   public var y: Float;
 
-  public var body: CPhysicsBody;
+  public var body: Body;
 
   static var pool: Array<RayHit> = [];
 
-  public static function get(target: Vec2, origin: Vec2, ?body: CPhysicsBody): RayHit {
+  public static function get(target: Vec2, origin: Vec2, ?body: Body): RayHit {
     if (pool.length > 0) {
       final hit = pool.pop();
       hit.x = target.x;
@@ -31,7 +30,7 @@ class RayHit {
     }
   }
 
-  public function new(target: Vec2, origin: Vec2, ?body: CPhysicsBody) {
+  public function new(target: Vec2, origin: Vec2, ?body: Body) {
     this.x = target.x;
     this.y = target.y;
     this.body = body;

@@ -1,0 +1,38 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build Jume",
+			"type": "shell",
+			"command": "jume",
+			"windows": {
+				"command": "jume.bat"
+			},
+			"args": [
+				"build",
+			],
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe"
+			],
+			"group": "build",
+		},
+		{
+			"label": "Build Jume Debug",
+			"type": "shell",
+			"command": "jume",
+			"windows": {
+				"command": "jume.bat"
+			},
+			"args": [
+				"build",
+				"--debug"
+			],
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe"
+			],
+			"group": "build",
+		}
+	]
+}

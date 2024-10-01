@@ -1,8 +1,7 @@
-package jume.physics;
+package jume.physics.core;
 
 import jume.math.Rectangle;
 import jume.math.Vec2;
-import jume.physics.components.CPhysicsBody;
 
 class QuadNode {
   static final MAX_BODIES = 6;
@@ -11,7 +10,7 @@ class QuadNode {
 
   var depth: Int;
 
-  final bodies: Array<CPhysicsBody> = [];
+  final bodies: Array<Body> = [];
 
   final nodes: Array<QuadNode> = [];
 
@@ -65,7 +64,7 @@ class QuadNode {
     list.push(bounds);
   }
 
-  public function insert(body: CPhysicsBody) {
+  public function insert(body: Body) {
     if (nodes.length > 0) {
       final index = getIndex(body.bounds);
       if (index == -1) {
@@ -100,7 +99,7 @@ class QuadNode {
     }
   }
 
-  public function getBodyList(body: CPhysicsBody, list: Array<CPhysicsBody>) {
+  public function getBodyList(body: Body, list: Array<Body>) {
     final index = getIndex(body.bounds);
     if (nodes.length > 0) {
       if (index == -1) {
