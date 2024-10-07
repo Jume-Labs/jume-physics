@@ -108,8 +108,8 @@ class SPhysics extends System {
       tree = new QuadTree(0, 0, view.viewWidth, view.viewHeight);
     }
 
-    registerList({ entities: entities, components: [CPhysicsBody, CTransform] });
-    registerList({ entities: tilemaps, components: [CTilemapCollider] });
+    addEntityListener({ entities: entities, components: [CPhysicsBody, CTransform] });
+    addEntityListener({ entities: tilemaps, components: [CTilemapCollider] });
     active = true;
 
     return this;
