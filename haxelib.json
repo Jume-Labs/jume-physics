@@ -8,6 +8,6 @@
   "releasenote": "",
   "url": "https://github.com/jume-labs/jume-physics",
   "dependencies": {
-    "jume": "git:https://github.com/jume-labs/jume.gi"
+    "jume": "git:https://github.com/jume-labs/jume.git"
   }
 }
