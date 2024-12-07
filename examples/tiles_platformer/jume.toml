@@ -15,7 +15,7 @@ libraries = ["jume-physics"]
 
 parameters = ["-dce full"]
 
-[[atlases]]
+[[atlas]]
 name = "sprites"
 saveFolder = "assets/atlases"
 folders = ["art/sprites"]
@@ -23,7 +23,7 @@ trimmed = true
 extrude = 1
 packMethod = "optimal"
 
-[[atlases]]
+[[atlas]]
 name = "tiles"
 saveFolder = "assets/atlases"
 folders = ["art/tiles"]

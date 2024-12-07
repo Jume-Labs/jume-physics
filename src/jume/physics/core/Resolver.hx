@@ -3,10 +3,15 @@ package jume.physics.core;
 private final OVERLAP_PADDING = 4;
 
 function separate(body1: Body, body2: Body): Bool {
-  if (Math.abs(body1.velocity.x) > Math.abs(body1.velocity.y)) {
-    return separateX(body1, body2) || separateY(body1, body2);
-  } else {
+  final bounds1 = body1.bounds;
+  final bounds2 = body2.bounds;
+  final overlapX = Math.min(bounds1.x + bounds1.width, bounds2.x + bounds2.width) - Math.max(bounds1.x, bounds2.x);
+  final overlapY = Math.min(bounds1.y + bounds1.height, bounds2.y + bounds2.height) - Math.max(bounds1.y, bounds2.y);
+
+  if (overlapX > overlapY) {
     return separateY(body1, body2) || separateX(body1, body2);
+  } else {
+    return separateX(body1, body2) || separateY(body1, body2);
   }
 }
 

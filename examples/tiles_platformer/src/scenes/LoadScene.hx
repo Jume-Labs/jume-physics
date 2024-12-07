@@ -25,7 +25,7 @@ class LoadScene extends Scene {
         type: Tileset,
         id: 'tiles',
         path: 'assets/atlases/tiles.png',
-        props: {
+        options: {
           tileWidth: 20,
           tileHeight: 20,
           margin: 1,

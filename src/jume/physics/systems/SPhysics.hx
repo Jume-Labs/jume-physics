@@ -135,6 +135,7 @@ class SPhysics extends System {
       for (body in collider.bodies) {
         updatePastInteractions(body);
         body.wasTouching = body.touching;
+        body.touching = NONE;
         if (!bounds.intersects(body.bounds)) {
           continue;
         }
@@ -150,6 +151,7 @@ class SPhysics extends System {
       final body = entity.getComponent(CPhysicsBody).body;
       updatePastInteractions(body);
       body.wasTouching = body.touching;
+      body.touching = NONE;
       body.lastPos.set(body.bounds.x, body.bounds.y);
       updateBodyBounds(entity);
 
