@@ -1,0 +1,11 @@
+--library jume
+--library jume-physics
+-cp src
+
+-dce full
+
+--debug
+
+-js export/jume.js
+
+-main Main
